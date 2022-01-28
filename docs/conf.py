@@ -12,14 +12,14 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath("../../src"))
+sys.path.insert(0, os.path.abspath("../fsmpy"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'fuzzy_sets_measures'
-copyright = '2021, George Sidiropoulos'
-author = 'George Sidiropoulos'
+project = 'fsmpy - fuzzy_set_measures'
+copyright = '2022, Machine Learning and Vision Research Group'
+author = 'Machine Learning and Vision Research Group'
 
 
 # -- General configuration ---------------------------------------------------

@@ -102,9 +102,19 @@ classify(diagnoses, patients[0], wang_xin, p=2)
 # Citation
 If you use fsmpy in a scientific publication, please use the following bibtex citation:
 ```
-@misc{ ,
-      title={ }, 
-      author={ },
-      year={2021},
+@article{
+      2022, 
+      title={Fsmpy: A Fuzzy Set Measures Python Library}, 
+      volume={13}, 
+      ISSN={2078-2489}, 
+      url={http://dx.doi.org/10.3390/info13020064}, 
+      DOI={10.3390/info13020064}, 
+      number={2}, 
+      journal={Information}, 
+      publisher={MDPI AG}, 
+      author={Sidiropoulos, George K. and Apostolidis, Kyriakos D. and Damianos, Nikolaos and Papakostas, George A.}, 
+      year={2022}, 
+      month={Jan}, 
+      pages={64}
 }
 ```
