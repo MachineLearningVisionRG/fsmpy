@@ -157,7 +157,7 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
                 self.class_patterns[_class] = FuzzySet(mean_m, mean_v)
         return self
 
-    def predict(self, X: Iterable[FuzzySet]) -> List[np.intp]:
+    def predict(self, X: Iterable[FuzzySet]) -> np.ndarray:
         """ Predict class labels for samples X.
         
         Calculates the membership and non-membership values of each word for each unity class in y.
@@ -186,9 +186,9 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
                     ]
                 )
             )
-        return [self.classes_[pred] for pred in predictions]
+        return np.array([self.classes_[pred] for pred in predictions])
 
-    def predict_proba(self, X: Iterable[FuzzySet]):
+    def predict_proba(self, X: Iterable[FuzzySet]) -> np.ndarray:
         """ Measures of each sample.
         
         The returned values are the results returned when the measure_caller is called
@@ -214,15 +214,15 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
                 [self.measure_caller(x, self.class_patterns[_class], **self._measure_kwargs)
                  for _class in self.classes_]
             )
-        return probas
+        return np.vstack(probas)
 
-    def get_params(self, deep=True):
+    def get_params(self, deep=True) -> dict:
         params = {k: v for k, v in self._measure_kwargs.items()}
         params["measure_caller"] = self.measure_caller
         params["is_distance"] = self.is_distance
         return params
 
-    def set_params(self, **parameters):
+    def set_params(self, **parameters) -> object:
         for parameter, value in parameters.items():
             if parameter in ["is_distance", "measure_caller"]:
                 setattr(self, parameter, value)

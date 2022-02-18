@@ -722,7 +722,7 @@ def hong_kim(A: FuzzySet, B: FuzzySet, weights: Iterable = None, a: int = 1, b: 
     
     if not (a >= c >= 0 >= b):
         raise ValueError(
-            "Parameters a, b and c must satisfy the condition a >= c >= 0 >= 0, got {} {} {}".format(a, b, c))
+            "Parameters a, b and c must satisfy the condition a >= c >= 0 >= b, got {} {} {}".format(a, b, c))
 
     if weights is None:
         D = np.sum(
@@ -735,8 +735,14 @@ def hong_kim(A: FuzzySet, B: FuzzySet, weights: Iterable = None, a: int = 1, b: 
     else:
         denom = float(a + b + c)
 
-        num = (a * np.absolute(A.membership_values - B.membership_values)) + (b * np.absolute(A.non_membership_values - B.non_membership_values)
-                                                                              ) + (c * np.absolute(B.membership_values + B.non_membership_values - A.membership_values - A.non_membership_values))
+        num = (
+            (a * np.absolute(A.membership_values - B.membership_values)) +
+            (b * np.absolute(A.non_membership_values - B.non_membership_values)) +
+            (c * np.absolute(B.membership_values + 
+                             B.non_membership_values - 
+                             A.membership_values - 
+                             A.non_membership_values))
+        )
 
         D = np.sum(weights * (1 - num / denom))
 

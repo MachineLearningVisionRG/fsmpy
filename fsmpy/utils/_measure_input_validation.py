@@ -53,7 +53,7 @@ def check_p(p: Union[int, float], actual_measure_type: Union[Iterable, str, int]
             ValueError if p is not an integer or if it is < 1.
     """
     if len(measure_types_required) == 0 or actual_measure_type in measure_types_required:
-        if not isinstance(p, int):
+        if not np.issubdtype(type(p), int):
             raise ValueError(
                 "p parameter must be an integer, not {}".format(type(p)))
         elif p < 1:

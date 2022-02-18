@@ -26,7 +26,7 @@ def calculate_documents_membership(data: Iterable, membership_weight: float, non
     Returns
     -------
     list[FuzzySet]
-        List of FuzzySets for each class.
+        List of IntuitionisticFuzzySets for each class.
     np.ndarray : means
         Mean values for each token in data.
     np.ndarray : stds
@@ -37,20 +37,20 @@ def calculate_documents_membership(data: Iterable, membership_weight: float, non
     sklearn.feature_extraction.text.CountVectorizer
     """    
     means = np.mean(data, axis=0, dtype=np.float64)  # mean of each sample
-    stds = np.std(data, axis=0, dtype=np.float32, ddof=1)  # std of each sample
+    stds = np.std(data, axis=0, dtype=np.float64, ddof=1)  # std of each sample
 
     # calculate membership values of each word for each document
     z = (data - means) / stds
-    z[np.isnan(z)] = 0
+    np.nan_to_num(z, copy=False, nan=0)
 
     m = membership_weight / (1. + np.exp(-z))
     v = non_membership_weight / (1. + np.exp(z))
     p = 1 - m - v
-    sets = []
-    for i in range(len(m)):
-        sets.append(
-            IntuitionisticFuzzySet(m[i], v[i], p[i])
-        )
+    
+    sets = [
+        IntuitionisticFuzzySet(_m, v[i], p[i])
+        for i, _m in enumerate(m)
+    ]
 
     return sets, means, stds
 
