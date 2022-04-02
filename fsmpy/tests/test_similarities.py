@@ -81,12 +81,9 @@ def test_mitchell():
     A3 = IntuitionisticFuzzySet([0.6, 0.8, 1.0], [0.2, 0.0, 0.0])
     B = IntuitionisticFuzzySet([0.5, 0.6, 0.8], [0.3, 0.2, 0.1])
 
-    # raise NotImplementedError("No tests implemented")
-
 
 def test_julian_hung_lin():
     pass
-    # raise NotImplementedError("No tests implemented")
 
 
 def test_hung_yang_1():
