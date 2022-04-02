@@ -3,7 +3,7 @@ from collections.abc import Iterable
 import numpy as np
 
 
-class FuzzySet:
+class IntuitionisticFuzzySet:
     """ Object to represent a Fuzzy Sets.
 
     Attributes

@@ -48,9 +48,9 @@ Before opening a pull request, take a look at the [contribution](CONTRIBUTING.md
 # Examples
 Some basic usage examples are provided below. Please take a look at the documentation for further information and detailed examples.
 ## Fuzzy sets representation
-Fuzzy Sets are represented through the FuzzySet class which includes attributes for the corresponding membership and non-membership values. A Fuzzy Set *S* with membership and non-membership values is initialized in the following manner:
+Fuzzy Sets are represented through the IntuitionisticFuzzySet class which includes attributes for the corresponding membership and non-membership values. A Fuzzy Set *S* with membership and non-membership values is initialized in the following manner:
 ```
-S = FuzzySet(membership_values: Iterable, non_membership_values: Iterable = None)
+S = IntuitionisticFuzzySet(membership_values: Iterable, non_membership_values: Iterable = None)
 ```
 
 
@@ -62,11 +62,11 @@ To represent the following Fuzzy Set patterns in ![X](https://latex.codecogs.com
 
 ![S3](https://latex.codecogs.com/gif.latex?%5Cbg_white%20%5Clarge%20S_3%3D%5C%7B%28x_1%2C%200.9%2C%200.5%7Cx_1%29%2C%20%28x_2%2C%200.8%2C%200.3%7Cx_2%29%5C%7D)
 
-use the FuzzySet class to initialize an object like so:
+use the IntuitionisticFuzzySet class to initialize an object like so:
 ```
-S1 = FuzzySet([0.5, 0.8, 0.7], [0.4, 0.0, 0.1])
-S1 = FuzzySet([1.0, 0.0, 1.0], [0.0, 0.0, 0.1])
-S1 = FuzzySet([0.9, 0.8, 0.0], [0.5, 0.3, 0.0])
+S1 = IntuitionisticFuzzySet([0.5, 0.8, 0.7], [0.4, 0.0, 0.1])
+S1 = IntuitionisticFuzzySet([1.0, 0.0, 1.0], [0.0, 0.0, 0.1])
+S1 = IntuitionisticFuzzySet([0.9, 0.8, 0.0], [0.5, 0.3, 0.0])
 ```
 
 Note that patterns that do not represent a set should be set to 0. 
