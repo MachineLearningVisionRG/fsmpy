@@ -3,7 +3,7 @@ from typing import Iterable
 import warnings
 
 from .utils._measure_input_validation import check_weights, check_p, check_sets_cardinality
-from .sets import FuzzySet, IntuitionisticFuzzySet
+from .sets import IntuitionisticFuzzySet, IntuitionisticFuzzySet
 from . import HUNG_YANG_1_SIMILARITY_1, HUNG_YANG_1_SIMILARITY_2, HUNG_YANG_1_SIMILARITY_3
 from . import HUNG_YANG_2_SIMILARITY_1, HUNG_YANG_2_SIMILARITY_2, HUNG_YANG_2_SIMILARITY_3
 from . import HUNG_YANG_3_SIMILARITY_1, HUNG_YANG_3_SIMILARITY_2, HUNG_YANG_3_SIMILARITY_3, HUNG_YANG_3_SIMILARITY_4, HUNG_YANG_3_SIMILARITY_5, HUNG_YANG_3_SIMILARITY_6, HUNG_YANG_3_SIMILARITY_7
@@ -16,16 +16,20 @@ from . import DENG_JIANG_FU_MONOTONIC_TYPE_1_1, DENG_JIANG_FU_MONOTONIC_TYPE_1_2
     DENG_JIANG_FU_MONOTONIC_TYPE_2_2, DENG_JIANG_FU_MONOTONIC_TYPE_2_3, DENG_JIANG_FU_MONOTONIC_TYPE_2_4, \
     DENG_JIANG_FU_MONOTONIC_TYPE_3_1, DENG_JIANG_FU_MONOTONIC_TYPE_3_2, DENG_JIANG_FU_MONOTONIC_TYPE_3_3
 
+# used in intarapaiboon
+from .distances import atanassov
+from . import DISTANCE_NORMALIZED_HAMMING
 
-def dengfeng_chuntian(A: FuzzySet, B: FuzzySet, p: int = 1, weights: Iterable = None):
+
+def dengfeng_chuntian(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int = 1, weights: Iterable = None):
     """ Similarity proposed by L. Dengfeng and C. Chuntian, from the related article: 
     "New similarity measures of intuitionistic fuzzy sets and application to pattern recognition"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     p : int
         Positive integer >= 1.
@@ -50,15 +54,15 @@ def dengfeng_chuntian(A: FuzzySet, B: FuzzySet, p: int = 1, weights: Iterable = 
         return 1 - np.power(np.sum(weights * np.power(np.absolute(fA - fB), p)), (1.0 / float(p)))
 
 
-def liang_shi(A: FuzzySet, B: FuzzySet,  similarity_type: str = LIANG_SHI_SIMILARITY_1, p: int = 1, weights: Iterable = None , omegas: Iterable = [0.5, 0.3, 0.2]):
+def liang_shi(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet,  similarity_type: str = LIANG_SHI_SIMILARITY_1, p: int = 1, weights: Iterable = None , omegas: Iterable = [0.5, 0.3, 0.2]):
     """ Similarity proposed by Z. Liang and P. Shi, from the related article: 
     "Similarity measures on intuitionistic fuzzy sets""
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type : str, optional 
         Type of computed similarity:
@@ -86,6 +90,8 @@ def liang_shi(A: FuzzySet, B: FuzzySet,  similarity_type: str = LIANG_SHI_SIMILA
     if similarity_type == LIANG_SHI_SIMILARITY_3:
         if weights is None:
             weights = np.full(len(A), 1 / float(len(A)))
+        else:
+            weights = np.array(weights)
 
         omegas = np.array(omegas)
         if len(omegas.shape) == 1:
@@ -152,9 +158,9 @@ def park_kwun_lim(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int =
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     p : int
         Positive integer >= 1.
@@ -192,15 +198,15 @@ def park_kwun_lim(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int =
         )
 
 
-def mitchell(A: FuzzySet, B: FuzzySet, p: int = 1, weights: Iterable = None):
+def mitchell(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int = 1):
     """ Similarity proposed by H.B. Mitchell, from the related article: 
     "On the Dengfeng-Chuntian similarity measure and its application to pattern recognition"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     p : int
         Positive integer >= 1.
@@ -214,36 +220,34 @@ def mitchell(A: FuzzySet, B: FuzzySet, p: int = 1, weights: Iterable = None):
     """
     check_sets_cardinality(A, B)
     check_p(p)
-    check_weights(weights, len(A))
-
-    if weights is None:
-        weights = np.full(len(A), 1.0 / float(len(A)))
     
-    D_m = 1.0 - np.power(
-        np.sum(
-            weights * 
-            np.power(np.absolute(A.membership_values - B.membership_values), p)
-        ), (1.0 / p)
-    )
-    D_f = 1.0 - np.power(
-        np.sum(
-            weights * 
-            np.power(np.absolute(A.non_membership_values - B.non_membership_values), p)
-        ), (1.0 / p)
-    )
+    n = len(A)
+    
+    def pAB(a, b, p):
+        return (
+            1 -
+            (1 / (n ** (1/p))) * (
+                np.sum(np.abs(a - b) ** p) ** (1/p)
+            )
+        )
+    
+    return (
+        pAB(A.membership_values, B.membership_values, p) + 
+        pAB(1.0 - A.non_membership_values, 1.0 - B.non_membership_values, p)
+    ) / 2.0
+    
+    
 
-    return (D_m + D_f) / 2.0
 
-
-def julian_hung_lin(A: FuzzySet, B: FuzzySet, p: int = 1, weights: Iterable = None):
+def julian_hung_lin(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int = 1, weights: Iterable = None):
     """ Similarity proposed by P. Julian, K.C. Hung and S.J. Lin, from the related article: 
     "On the Mitchell similarity measure and its application to pattern recognition"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     p : int
         Positive integer >= 1.
@@ -260,32 +264,27 @@ def julian_hung_lin(A: FuzzySet, B: FuzzySet, p: int = 1, weights: Iterable = No
     check_weights(weights, len(A))
 
     if weights is None:
-        weights = np.full(len(A), 1 / float(len(A)))
+        weights = np.ones(len(A)) / len(A)
+
+    delta_memberships = np.abs(A.membership_values - B.membership_values)
+    delta_non_memberships = np.abs((1.0 - A.non_membership_values) - (1.0 - B.non_membership_values))
     
-    fA = 1.0 - A.non_membership_values
-    fB = 1.0 - B.non_membership_values
-    return 1.0 - np.power(
-        np.sum(
-            weights * 
-            np.power(np.absolute(A.membership_values - B.membership_values), p)
-        ), 1.0 / p
-    ) + np.power(
-        np.sum(
-            weights * 
-            np.power(np.absolute(fA - fB), p)
-        ), 1.0 / p
+    return (
+        1 - 
+        np.sum(weights * (delta_memberships ** p)) ** (1/p) - 
+        np.sum(weights * (delta_non_memberships ** p)) ** (1/p)
     )
 
 
-def hung_yang_1(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_1_SIMILARITY_1, weights: Iterable = None):
+def hung_yang_1(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity_type: str = HUNG_YANG_1_SIMILARITY_1, weights: Iterable = None):
     """ Similarity proposed by W.L. Hung and M.S. Yang, from the related article: 
     "Similarity measures of intuitionistic fuzzy sets based on Hausdorff similarity"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type: str, optional
         Type of computed similarity:
@@ -326,15 +325,15 @@ def hung_yang_1(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_1_SIM
             "similarity_type parameter must be HUNG_YANG_1_SIMILARITY_1, HUNG_YANG_1_SIMILARITY_2 or HUNG_YANG_1_SIMILARITY_3.")
 
 
-def ye(A: FuzzySet, B: FuzzySet, weights: Iterable = None):
+def ye(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights: Iterable = None):
     """ Similarity proposed by J. Ye, from the related article: 
     "Cosine similarity measures for intuitionistic fuzzy sets and their applications"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -363,15 +362,15 @@ def ye(A: FuzzySet, B: FuzzySet, weights: Iterable = None):
         return sum(weights * nominator / denominator)
 
 
-def hwang_yang(A: FuzzySet, B: FuzzySet):
+def hwang_yang(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet):
     """ Similarity proposed by C.M. Hwang and M.S. Yang, from the related article: 
     "Modified cosine similarity measure between intuitionistic fuzzy sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         
     Returns
@@ -415,9 +414,9 @@ def hung_yang_2(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type : str, optional
         Type of computed similarity:
@@ -437,16 +436,8 @@ def hung_yang_2(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity
         ValueError if a is < 1.
     """
     def _log(arr):
-        invalids = np.logical_or(
-            arr <= 0, 
-            np.isnan(arr), 
-            np.isinf(arr)
-        )
-        invalid_indxs = np.where(invalids)
-        valid_indxs = np.where(np.logical_not(invalids))
-        arr[invalid_indxs] = 0.0
-        arr[valid_indxs] = np.log(arr[valid_indxs])
-        return arr
+        result = np.log(arr)
+        return np.nan_to_num(result, copy=False, nan=0.0, posinf=0.0, neginf=0.0)
     
     check_sets_cardinality(A, B)
     
@@ -454,45 +445,53 @@ def hung_yang_2(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity
     if a < 1 and not isinstance(a, int):
         raise ValueError("a parameter must be an integer >= 1.")
 
+    added_memberships = A.membership_values + B.membership_values
+    added_non_memberships = A.non_membership_values + B.non_membership_values
+    added_hesitations = A.hesitation_degrees + B.hesitation_degrees
+    
     if a == 1:
         U_a = np.log(2.0)
-
+        
         LABm = (
-            (A.membership_values + B.membership_values) * _log((A.membership_values + B.membership_values) / 2) -
+            added_memberships * _log(added_memberships / 2) -
             A.membership_values * _log(A.membership_values) - 
             B.membership_values * _log(B.membership_values)
         )
 
         LABv = (
-            (A.non_membership_values + B.non_membership_values) * _log((A.non_membership_values + B.non_membership_values) / 2) - 
+            added_non_memberships * _log(added_non_memberships / 2) - 
             A.non_membership_values *  _log(A.non_membership_values) - 
             B.non_membership_values * _log(B.non_membership_values)
         )
 
         LABp = (
-            (A.hesitation_degrees + B.hesitation_degrees) * _log((A.hesitation_degrees + B.hesitation_degrees) / 2) -
+            added_hesitations * _log(added_hesitations / 2) -
             A.hesitation_degrees * _log(A.hesitation_degrees) - 
             B.hesitation_degrees * _log(B.hesitation_degrees)
         )
         ja = -0.5 * (LABm + LABv + LABp)
     else:
-        U_a = 1.0 / (float(a) - 1.0) * (1 - 1 / float(2.0 ** (a - 1.0)))
+        U_a = (
+            1.0 / (a - 1.0) * 
+            (1 - 1 / np.power(2.0, a-1))
+        )
+        
         TmAB = (
-                np.power((A.membership_values + B.membership_values) / 2.0, a) - 
+            np.power(added_memberships / 2.0, a) - 
             0.5 * (
                 np.power(A.membership_values, a) + 
                 np.power(B.membership_values, a)
             )
         )
         TvAB = (
-            np.power((A.non_membership_values + B.non_membership_values) / 2.0, a) - 
+            np.power(added_non_memberships / 2.0, a) - 
             0.5 * (
                 np.power(A.non_membership_values, a) +
                 np.power(B.non_membership_values, a)
             )
         )
         TpAB = (
-            np.power((A.hesitation_degrees + B.hesitation_degrees) / 2.0, a) - 
+            np.power(added_hesitations / 2.0, a) - 
             0.5 * (
                 np.power(A.hesitation_degrees, a) +
                 np.power(B.hesitation_degrees, a)
@@ -500,12 +499,12 @@ def hung_yang_2(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity
         )
         ja = -1 / (a - 1) * (TmAB + TvAB + TpAB)
 
-    J_a = np.sum(ja) / float(n)
+    J_a = np.sum(ja) / n
 
     if (similarity_type == HUNG_YANG_2_SIMILARITY_1):
         return (U_a - J_a) / U_a
     elif (similarity_type == HUNG_YANG_2_SIMILARITY_2):
-        return (np.exp(-J_a) - np.exp(-U_a)) / float(1 - np.exp(-U_a))
+        return (np.exp(-J_a) - np.exp(-U_a)) / (1 - np.exp(-U_a))
     elif (similarity_type == HUNG_YANG_2_SIMILARITY_3):
         return (U_a - J_a) / np.array((1 + J_a) * U_a)
     else:
@@ -513,15 +512,15 @@ def hung_yang_2(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity
             "similarity_type parameter must be HUNG_YANG_2_SIMILARITY_1, HUNG_YANG_2_SIMILARITY_2 or HUNG_YANG_2_SIMILARITY_3.")
 
 
-def zhang_fu(A: FuzzySet, B: FuzzySet):
+def zhang_fu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet):
     """ Similarity proposed by C. Zhang and H. Fu, from the related article: 
     "Similarity measures on three kinds of fuzzy sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         
     Returns
@@ -541,15 +540,15 @@ def zhang_fu(A: FuzzySet, B: FuzzySet):
     return 1.0 - (1.0 / (2.0 * n)) * np.sum(np.abs(dA - dB) + np.abs(aA - aB))
 
 
-def hung_yang_3(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_3_SIMILARITY_1):
+def hung_yang_3(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity_type: str = HUNG_YANG_3_SIMILARITY_1):
     """ Similarity proposed by W.L. Hung and M.S. Yang, from the related article: 
     "On similarity measures between intuitionistic fuzzy sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type : str, optional
         Type of computed similarity:
@@ -591,9 +590,12 @@ def hung_yang_3(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_3_SIM
         D2 = np.sum(denom)
         return D1 / float(D2)
     elif similarity_type == HUNG_YANG_3_SIMILARITY_4:
-        dif_m = np.absolute(A.membership_values - B.membership_values)
-        dif_v = np.absolute(A.non_membership_values - B.non_membership_values)
-        return 1 - 0.5 * (dif_m.max() + dif_v.max())
+        delta_memberships = np.absolute(A.membership_values - B.membership_values)
+        delta_non_memberships = np.absolute(A.non_membership_values - B.non_membership_values)
+        return 1 - 0.5 * (
+            delta_memberships.max() + 
+            delta_non_memberships.max()
+        )
     elif similarity_type == HUNG_YANG_3_SIMILARITY_5:
         num = np.absolute(A.membership_values - B.membership_values) + \
             np.absolute(A.non_membership_values - B.non_membership_values)
@@ -617,15 +619,15 @@ def hung_yang_3(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_3_SIM
             "similarity_type parameter must be HUNG_YANG_3_SIMILARITY_1, HUNG_YANG_3_SIMILARITY_2, HUNG_YANG_3_SIMILARITY_3, HUNG_YANG_3_SIMILARITY_4, HUNG_YANG_3_SIMILARITY_,5, HUNG_YANG_3_SIMILARITY_6 or HUNG_YANG_3_SIMILARITY_7.")
 
 
-def chen_1(A: FuzzySet, B: FuzzySet, weights: Iterable = None):
+def chen_1(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights: Iterable = None):
     """ Similarity proposed by S.M. Chen, from the related article: 
     "Measures of similarity between vague sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -639,10 +641,10 @@ def chen_1(A: FuzzySet, B: FuzzySet, weights: Iterable = None):
     check_weights(weights, len(A))
 
     if weights is None:
-        weights = np.full(len(A), 1.0 / len(A))
+        weights = np.ones(len(A)) / len(A)
 
-    sA = A.membership_values - A.non_membership_values
-    sB = B.membership_values - B.non_membership_values
+    sA = A.membership_values + A.non_membership_values - 1
+    sB = B.membership_values + B.non_membership_values - 1
     
     return np.sum(
         weights * (
@@ -651,15 +653,15 @@ def chen_1(A: FuzzySet, B: FuzzySet, weights: Iterable = None):
     ) / np.sum(weights)
 
 
-def hung_yang_4(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_4_SIMILARITY_1, p: int = 1):
+def hung_yang_4(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity_type: str = HUNG_YANG_4_SIMILARITY_1, p: int = 1):
     """ Similarity proposed by W.L. Hung and M.S. Yang, from the related article: 
     "Similarity measures of intuitionistic fuzzy sets based on Lp metric"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type : str, optional
         Type of computed similarity:
@@ -696,15 +698,15 @@ def hung_yang_4(A: FuzzySet, B: FuzzySet, similarity_type: str = HUNG_YANG_4_SIM
             "similarity_type parameter must be HUNG_YANG_4_SIMILARITY_1, HUNG_YANG_4_SIMILARITY_2 or HUNG_YANG_4_SIMILARITY_3.")
 
 
-def hong_kim(A: FuzzySet, B: FuzzySet, weights: Iterable = None, a: int = 1, b: int = 0, c: int = 0):
+def hong_kim(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights: Iterable = None, a: int = 1, b: int = 0, c: int = 0):
     """ Similarity proposed by D.H. Hong and C.Kim, from the related article: 
     "A note on similarity measures between vague sets and between elements"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -749,15 +751,15 @@ def hong_kim(A: FuzzySet, B: FuzzySet, weights: Iterable = None, a: int = 1, b: 
         return D
 
 
-def chen_2(A: FuzzySet, B: FuzzySet, weights: Iterable = None, a: int = 1, b: int = 0, c: int = 0) -> float:
+def chen_2(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights: Iterable = None, a: int = 1, b: int = 0, c: int = 0) -> float:
     """ Similarity proposed by S.M. Chen, from the related article: 
         "Similarity measure between vague sets and between elements"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -794,9 +796,9 @@ def liu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int = 1, weight
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     p : int
         Positive integer >= 1.
@@ -826,15 +828,15 @@ def liu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int = 1, weight
         return 1 - D ** (1.0 / p)
 
 
-def iancu(A: FuzzySet, B: FuzzySet, similarity_type: int = IANCU_SIMILARITY_1, lamda: int = 1):
+def iancu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity_type: int = IANCU_SIMILARITY_1, lamda: int = 0):
     """ Similarities proposed by I. Iancu, from the related article: 
     "Intuitionistic fuzzy similarity measures based on Frank t-norms family"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type : int, optional
         Type of computed similarity:
@@ -855,11 +857,11 @@ def iancu(A: FuzzySet, B: FuzzySet, similarity_type: int = IANCU_SIMILARITY_1, l
     """
     check_sets_cardinality(A, B)
     def tOperator(a: Iterable, b: Iterable, lamda: float):
-        if (lamda == np.inf):
+        if lamda == np.inf:
             return np.maximum(0, a + b - 1)
-        elif (lamda == 0):
+        elif lamda == 0:
             return np.minimum(a, b)
-        elif (lamda == 1):
+        elif lamda == 1:
             return a * b
         else:
             return np.log(1.0 + (
@@ -867,6 +869,7 @@ def iancu(A: FuzzySet, B: FuzzySet, similarity_type: int = IANCU_SIMILARITY_1, l
                     (np.power(lamda, 1 - a) - 1.0) * (np.power(lamda, 1.0 - b) - 1.0)
                 ) / (lamda - 1.0)
             ))
+    
     delta_A = A.membership_values - A.non_membership_values
     delta_B = B.membership_values - B.non_membership_values
     n = len(A)
@@ -891,13 +894,13 @@ def iancu(A: FuzzySet, B: FuzzySet, similarity_type: int = IANCU_SIMILARITY_1, l
         return (
             (
                 n + np.sum(
-                    tOperator(A.membership_values, B.membership_values, lamda) +
-                    tOperator(A.non_membership_values, B.non_membership_values, lamda) -
-                    A.non_membership_values - B.non_membership_values
+                        tOperator(A.membership_values, B.membership_values, lamda) +
+                        tOperator(A.non_membership_values, B.non_membership_values, lamda) -
+                        A.non_membership_values - B.non_membership_values
                     )
              ) / 
              (
-                 n + np.max(np.sum(delta_A), np.sum(delta_B))
+                 n + np.maximum(np.sum(delta_A), np.sum(delta_B))
              )
         )
     elif similarity_type == IANCU_SIMILARITY_6:  # S1c
@@ -907,44 +910,100 @@ def iancu(A: FuzzySet, B: FuzzySet, similarity_type: int = IANCU_SIMILARITY_1, l
                                np.sum(delta_B))
         return nom / np.array(denom).astype("float")
     elif similarity_type == IANCU_SIMILARITY_7:  # S5
-        nom = n + np.sum(tOperator(A.membership_values, B.membership_values, lamda) + tOperator(
-            A.non_membership_values, B.non_membership_values, lamda) - A.non_membership_values - B.non_membership_values)
-        denom = n + np.sum(A.membership_values + B.membership_values - tOperator(A.membership_values,
-                           B.membership_values, lamda) - tOperator(A.non_membership_values, B.non_membership_values, lamda))
-        return nom / np.array(denom).astype("float")
+        nom = n + np.sum(
+            tOperator(A.membership_values, B.membership_values, lamda) + 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda) - 
+            A.non_membership_values - B.non_membership_values
+        )
+        denom = n + np.sum(
+            A.membership_values + 
+            B.membership_values - 
+            tOperator(A.membership_values, B.membership_values, lamda) - 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda)
+        )
+        return nom / denom
     elif similarity_type == IANCU_SIMILARITY_8:  # S5c
-        nom = n + np.sum(tOperator(A.membership_values, B.membership_values, lamda) + tOperator(
-            A.non_membership_values, B.non_membership_values, lamda) - A.membership_values - B.membership_values)
-        denom = n + np.sum(A.non_membership_values + B.non_membership_values - tOperator(A.membership_values,
-                           B.membership_values, lamda) - tOperator(A.non_membership_values, B.non_membership_values, lamda))
-        return nom / np.array(np.sum(denom)).astype("float")
+        nom = n + np.sum(
+            tOperator(A.membership_values, B.membership_values, lamda) + 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda) - 
+            A.membership_values - 
+            B.membership_values
+        )
+        denom = n + np.sum(
+            A.non_membership_values + 
+            B.non_membership_values - 
+            tOperator(A.membership_values, B.membership_values, lamda) - 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda)
+        )
+        return nom / np.sum(denom)
     elif similarity_type == IANCU_SIMILARITY_9:  # S14
-        nom = n + np.minimum(np.sum(delta_A),
-                             np.sum(delta_B))
-        denom = n + np.sum(A.membership_values + B.membership_values - tOperator(A.membership_values,
-                                                                                 B.membership_values, lamda) - tOperator(A.non_membership_values, B.non_membership_values, lamda))
+        nom = n + np.minimum(
+            np.sum(delta_A),
+            np.sum(delta_B)
+        )
+        denom = n + np.sum(
+            A.membership_values + 
+            B.membership_values - 
+            tOperator(A.membership_values, B.membership_values, lamda) - 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda)
+        )
         return nom / float(denom)
     elif similarity_type == IANCU_SIMILARITY_10:  # S14c
-        nom = n - np.maximum(np.sum(delta_A),
-                             np.sum(delta_B))
-        denom = n + np.sum(A.non_membership_values + B.non_membership_values - tOperator(A.membership_values,
-                                                                                         B.membership_values, lamda) - tOperator(A.non_membership_values, B.non_membership_values, lamda))
+        nom = n - np.maximum(
+            np.sum(delta_A),
+            np.sum(delta_B)
+        )
+        denom = n + np.sum(
+            A.non_membership_values + 
+            B.non_membership_values - 
+            tOperator(A.membership_values, B.membership_values, lamda) - 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda)
+        )
         return nom / float(denom)
     elif similarity_type == IANCU_SIMILARITY_11:  # S18
-        nom = n + np.sum(tOperator(A.membership_values, B.membership_values, lamda) + tOperator(
-            A.non_membership_values, B.non_membership_values, lamda) - A.non_membership_values - B.non_membership_values)
-        denom = 2.0 * n
-        return nom / denom
+        nom = n + np.sum(
+            tOperator(A.membership_values, B.membership_values, lamda) + 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda) - 
+            A.non_membership_values - 
+            B.non_membership_values
+        )
+        return nom / (2.0 * n)
     elif similarity_type == IANCU_SIMILARITY_12:  # S18c
-        nom = n - np.sum(tOperator(A.membership_values, B.membership_values, lamda) + tOperator(
-            A.non_membership_values, B.non_membership_values, lamda) - A.membership_values - B.membership_values)
-        denom = 2.0 * n
-        return nom / denom
+        nom = n - np.sum(
+            tOperator(A.membership_values, B.membership_values, lamda) + 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda) - 
+            A.membership_values - 
+            B.membership_values
+        )
+        return nom / (2.0 * n)
     elif similarity_type == IANCU_SIMILARITY_13:  # S2
         nom = 2.0 * n + np.sum(
-            2.0 * tOperator(A.membership_values, B.membership_values, lamda) + 2.0 * tOperator(A.non_membership_values, B.non_membership_values, lamda) - A.membership_values - B.membership_values - A.non_membership_values - B.non_membership_values)
-        denom = 2.0 * n + np.sum(tOperator(A.membership_values, B.membership_values, lamda) + tOperator(A.non_membership_values, B.non_membership_values, lamda)) - np.minimum(
-            np.sum(A.membership_values + B.non_membership_values), np.sum(B.membership_values + A.non_membership_values))
+            2.0 * 
+            tOperator(A.membership_values, B.membership_values, lamda) + 
+            2.0 * 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda) - 
+            A.membership_values - 
+            B.membership_values - 
+            A.non_membership_values - 
+            B.non_membership_values
+        )
+        denom = (
+            2.0 * n + 
+            np.sum(
+                tOperator(A.membership_values, B.membership_values, lamda) + 
+                tOperator(A.non_membership_values, B.non_membership_values, lamda)
+            ) - 
+            np.minimum(
+                np.sum(
+                    A.membership_values + 
+                    B.non_membership_values
+                ), 
+                np.sum(
+                    B.membership_values + 
+                    A.non_membership_values
+                )
+            )
+        )
         return nom / denom
     elif similarity_type == IANCU_SIMILARITY_14:  # S6
         nom = 2.0 * n + np.sum(
@@ -958,8 +1017,13 @@ def iancu(A: FuzzySet, B: FuzzySet, similarity_type: int = IANCU_SIMILARITY_1, l
             A.membership_values, B.membership_values, lamda) - 2 * tOperator(A.non_membership_values, B.non_membership_values, lamda))
         return nom / denom
     elif similarity_type == IANCU_SIMILARITY_16:  # S15
-        nom = 2.0 * n + np.sum(tOperator(A.membership_values, B.membership_values, lamda) + tOperator(A.non_membership_values, B.non_membership_values, lamda)) - np.maximum(np.sum(A.membership_values + B.non_membership_values),
-                                                                                                                                                                             np.sum(B.membership_values + A.non_membership_values))
+        nom = 2.0 * n + np.sum(
+            tOperator(A.membership_values, B.membership_values, lamda) + 
+            tOperator(A.non_membership_values, B.non_membership_values, lamda)
+        ) - np.maximum(
+                np.sum(A.membership_values + B.non_membership_values),
+                np.sum(B.membership_values + A.non_membership_values)
+            )
         denom = 2.0 * n
         return nom / denom
     elif similarity_type == IANCU_SIMILARITY_17:  # S2"
@@ -995,9 +1059,9 @@ def song_wang_lei_xue(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weig
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -1020,15 +1084,15 @@ def song_wang_lei_xue(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weig
             weights * (np.sqrt(A.membership_values * B.membership_values) + 2.0 * np.sqrt(A.non_membership_values * B.non_membership_values) + np.sqrt(A.hesitation_degrees * B.hesitation_degrees) + np.sqrt((1 - A.non_membership_values) * (1 - B.non_membership_values))))
 
 
-def intarapaiboon(A: FuzzySet, B: FuzzySet):
+def intarapaiboon(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet):
     """ Similarity proposed by P. Intarapaiboon, from the related article: 
     "A hierarchy-based similarity measure for intuitionistic fuzzy sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         
     Returns
@@ -1037,21 +1101,29 @@ def intarapaiboon(A: FuzzySet, B: FuzzySet):
         The similarity between the two sets provided.
     """
     check_sets_cardinality(A, B)
-    n = len(A)
-    delta_memberships = np.abs(A.membership_values - B.membership_values)
-    delta_non_memberships = np.abs(A.non_membership_values - B.non_membership_values)
-    return 1 - (1.0 / (2.0 * n) * np.sum(delta_memberships + delta_non_memberships))
+    C = IntuitionisticFuzzySet(
+        np.maximum(A.membership_values, B.membership_values),
+        np.maximum(A.non_membership_values, B.non_membership_values),
+    )
+    dAC = atanassov(A, C, distance_type=DISTANCE_NORMALIZED_HAMMING)
+    dBC = atanassov(B, C, distance_type=DISTANCE_NORMALIZED_HAMMING)  
+    L = np.minimum(dAC, dBC)
+    M = np.maximum(dAC, dBC)
+    return (
+        (2.0 - L) / (2.0 - M) *
+        (1.0 - dAC - dBC)
+    )
 
 
-def deng_jiang_fu(A: FuzzySet, B: FuzzySet, similarity_type: int = DENG_JIANG_FU_MONOTONIC_TYPE_1_1, p: int = None, u:float = None, v: float = None):
+def deng_jiang_fu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similarity_type: int = DENG_JIANG_FU_MONOTONIC_TYPE_1_1, p: int = None, u:float = None, v: float = None):
     """ Similarity proposed by G. Deng, Y. Jiang, J. Fu, from the related article: 
     "Monotonic similarity measures between intuitionistic fuzzy sets and their relationship with entropy and inclusion measure"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     similarity_type : int, optional
         Type of computed similarity:
@@ -1193,12 +1265,14 @@ def deng_jiang_fu(A: FuzzySet, B: FuzzySet, similarity_type: int = DENG_JIANG_FU
                 np.power(
                     np.sum(
                         np.power(delta_memberships, p)
-                    ) / n, 1.0 / p
+                    ) / n, 
+                    1.0 / p
                 ) -
                 np.power(
                     np.sum(
                         np.power(delta_non_memberships, p)
-                    ) / n, 1.0 / p
+                    ) / n, 
+                    1.0 / p
                 ) -
                 1.0
             ) /
@@ -1244,9 +1318,9 @@ def nguyen(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet):
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         
     Returns
@@ -1256,31 +1330,29 @@ def nguyen(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet):
     """
     check_sets_cardinality(A, B)
 
-    def k_single(m, v, p):
-        return np.sqrt(
-            np.power(m, 2.0) +
-            np.power(v, 2.0) +
-            np.power(1.0 - p, 2.0)
+    def membership_knowledge(f_set: IntuitionisticFuzzySet):
+        K = np.sqrt(
+            f_set.membership_values ** 2.0 + 
+            f_set.non_membership_values ** 2.0 + 
+            (1.0 - f_set.hesitation_degrees) ** 2.0
         )
-    def k(set: IntuitionisticFuzzySet):
-        return 1.0 / (len(set) * np.sqrt(2)) * np.sum(np.sqrt(
-            np.power(set.membership_values, 2.0) +
-            np.power(set.non_membership_values, 2.0) +
-            np.power(1.0 - set.hesitation_degrees, 2.0)
-        ))
-    def membership_knowledge(set: IntuitionisticFuzzySet):
-        memberships, non_memberships, hestitations = set.membership_values, set.non_membership_values, set.hesitation_degrees
-        K = 1.0 / (len(set) * np.sqrt(2)) * np.array([
-            k_single(m, v, p) if m >= v else -k_single(m, v, p)
-            for m, v, p in zip(memberships, non_memberships, hestitations)
-        ])
-        return 1.0 / len(set) * np.sum(K)
-        
-    _Ka = membership_knowledge(A)
-    _Kb = membership_knowledge(B)
-    Ka = k(A)
-    Kb = k(B)
-    return 1.0 - np.abs(Ka - Kb) if _Ka * _Kb >= 0 else np.abs(Ka - Kb) - 1.0
+        return 1.0 / (len(f_set) * np.sqrt(2.0)) * np.sum(K)
+
+    def negative_membership_knowledge(f_set: IntuitionisticFuzzySet):
+        mask = (f_set.membership_values >= f_set.non_membership_values) * 1.0
+        mask[mask == 0] = -1
+        K = 1.0 / (len(f_set) * np.sqrt(2.0)) * np.sqrt(
+            f_set.membership_values ** 2.0 + 
+            f_set.non_membership_values ** 2.0 + 
+            (1.0 - f_set.hesitation_degrees) ** 2.0
+        ) * mask
+        return np.sum(K) / len(f_set)
+
+    kFA = membership_knowledge(A)
+    kFB = membership_knowledge(B)
+    _kFA = negative_membership_knowledge(A)
+    _kFB = negative_membership_knowledge(B)
+    return 1.0 - np.abs(kFA - kFB) if _kFA * _kFB >= 0 else np.abs(kFA - kFB) - 1.0
 
 
 def chen_cheng_lan(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights=None):
@@ -1289,9 +1361,9 @@ def chen_cheng_lan(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -1309,24 +1381,27 @@ def chen_cheng_lan(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights
     
     delta_memberships = A.membership_values - B.membership_values
     delta_non_memberships = A.non_membership_values - B.non_membership_values
+    add_hesitations = A.hesitation_degrees + B.hesitation_degrees
     return np.sum(
         weights * (
             1.0 - 
-            np.abs(2.0 * delta_memberships - delta_non_memberships) / 3.0 * (1.0 - (A.hesitation_degrees + B.hesitation_degrees) / 2.0) -
-            np.abs(2.0 * delta_non_memberships - delta_memberships) / 3.0 * ((A.hesitation_degrees + B.hesitation_degrees) / 2.0)
+            np.abs(2.0 * delta_memberships - delta_non_memberships) / 3.0 * 
+            (1.0 - add_hesitations / 2.0) -
+            np.abs(2.0 * delta_non_memberships - delta_memberships) / 3.0 * 
+            (add_hesitations / 2.0)
         )
     )
 
 
-def muthukumar_krishnanb(A: FuzzySet, B: FuzzySet, weights=None):
+def muthukumar_krishnanb(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights=None):
     """ Similarity proposed by P. Muthukumar, G. S. S. Krishnan, from the related article: 
     "A similarity measure of intuitionistic fuzzy soft sets and itsapplication in medical diagnosis"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     weights : list of floats
         List of weights for each membership/non-membership value.
@@ -1345,8 +1420,14 @@ def muthukumar_krishnanb(A: FuzzySet, B: FuzzySet, weights=None):
                 A.non_membership_values * B.non_membership_values
             ) / 
             np.sum(
-                np.maximum(np.power(A.membership_values, 2.0), np.power(B.membership_values, 2.0)) + 
-                np.maximum(np.power(A.non_membership_values, 2.0), np.power(B.non_membership_values, 2.0))
+                np.maximum(
+                    np.power(A.membership_values, 2.0), 
+                    np.power(B.membership_values, 2.0)
+                ) + 
+                np.maximum(
+                    np.power(A.non_membership_values, 2.0), 
+                    np.power(B.non_membership_values, 2.0)
+                )
             )
         )
     else:

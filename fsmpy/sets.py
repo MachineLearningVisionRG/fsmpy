@@ -10,8 +10,6 @@ class FuzzySet:
     ----------
     membership_values : 1-d np.ndarray
         Membership values of the set.
-    non_membership_values : 1-d np.ndarray
-        Non-membership values of the set.
 
     Notes
     --------
@@ -19,9 +17,10 @@ class FuzzySet:
     For three patterns denoted in Fuzzy Sets in a universe 
     :math:`U=\{u_1, u_2, u_3\}`
     
-    mathematically, they are represented as follows :math:`(μ, ν)`
+    mathematically, they are represented as follows :math:`(μ)`
     """
-    def __init__(self, membership_values : Iterable, non_membership_values : Iterable = None):
+    
+    def __init__(self, membership_values : Iterable):
         """ Constructor method.
 
         For single valued sets, use an Iterable with a single value.
@@ -30,36 +29,9 @@ class FuzzySet:
         ----------
         membership_values : 1-d Iterable
             Membership values of the set.
-        non_membership_values : 1-d Iterable, optional
-            Non-membership values of the set. If not provided, an np.array is 
-            initialized with zeros with the same size as membership_values.
         
         """
-        self.membership_values = np.array(membership_values)
-        if non_membership_values is None:
-            self.non_membership_values = np.zeros_like(self.membership_values)
-        else:
-            self.non_membership_values = np.array(non_membership_values)
-
-    def __setattr__(self, name : str, value : Iterable):
-        """ Sets the values of the specified attribute.
-        
-        Parameters
-        ----------
-        name : str
-            Name of the attribute to set.
-        value : Iterable
-            The values to set to the attribute.
-        
-        Raises
-        ------
-        TypeError if value is not an Iterable or a numpy array
-        """
-        if not isinstance(value, Iterable):
-            raise TypeError(
-                "{} must be an Iterable or a numpy array, not {}!".format(name, type(value)))
-
-        self.__dict__[name] = np.array(value)
+        self.membership_values = np.asarray(membership_values)
 
     def __len__(self):
         """ Returns cardinality of the set.
@@ -79,7 +51,7 @@ class FuzzySet:
         -------
         str
         """
-        return "μ: {},\nv:{}".format(self.membership_values, self.non_membership_values)
+        return "{" + ", ".join(self.membership_values) + "}"
 
 
 class IntuitionisticFuzzySet(FuzzySet):
@@ -103,8 +75,9 @@ class IntuitionisticFuzzySet(FuzzySet):
     For three patterns denoted in Intuitionistic Fuzzy Sets in a universe 
     :math:`U=\{u_1, u_2, u_3\}`
     
-    mathematically, they are represented as follows :math:`(μ, ν)`
+    mathematically, they are represented as follows :math:`(μ, ν, π)`
     """
+    
     def __init__(self, membership_values: Iterable, non_membership_values: Iterable = None, hesitation_degrees: Iterable = None):
         """ Constructor method.
 
@@ -123,11 +96,16 @@ class IntuitionisticFuzzySet(FuzzySet):
             >>> hesitation_degrees = 1.0 - membership_values - self.non_membership_values
         
         """
-        super().__init__(membership_values, non_membership_values)
-        if hesitation_degrees is None:
-            self.hesitation_degrees = 1.0 - np.array(membership_values) - np.array(self.non_membership_values)
+        super().__init__(membership_values)
+        if non_membership_values is None:
+            self.non_membership_values = np.zeros_like(self.membership_values)
         else:
-            self.hesitation_degrees = hesitation_degrees
+            self.non_membership_values = np.asarray(non_membership_values)
+        
+        if hesitation_degrees is None:
+            self.hesitation_degrees = 1.0 - self.membership_values - self.non_membership_values
+        else:
+            self.hesitation_degrees = np.asarray(hesitation_degrees)
 
     def __len__(self):
         """ Returns cardinality of the set.
@@ -147,4 +125,7 @@ class IntuitionisticFuzzySet(FuzzySet):
         -------
         str
         """
-        return "μ: {}\nv:{}\nπ: {}".format(self.membership_values, self.non_membership_values, self.hesitation_degrees)
+        return "{" + ", ".join([
+            f"({m}, {v}, {p})"
+            for m, v, p in zip(self.membership_values, self.non_membership_values, self.hesitation_degrees)    
+        ]) + "}"

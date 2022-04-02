@@ -8,14 +8,14 @@ from . import WANGXIN_DISTANCE_1, WANGXIN_DISTANCE_2
 from .sets import FuzzySet, IntuitionisticFuzzySet
 
 
-def atanassov(A: FuzzySet, B: FuzzySet, distance_type: str = DISTANCE_HAMMING) -> np.float64:
+def atanassov(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distance_type: str = DISTANCE_HAMMING) -> np.float64:
     """ Distance proposed by K.T. Atanassov, from the related article: "Intuitionistic fuzzy sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     distance_type: str, optional
         Type of computed distance: 
@@ -71,9 +71,9 @@ def szmidt_kacprzyk(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distan
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     distance_type: str, optional
         Type of computed distance: 
@@ -127,15 +127,15 @@ def szmidt_kacprzyk(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distan
             "Invalid distance type provided. Please check the available flags.")
 
 
-def wang_xin(A: FuzzySet, B: FuzzySet, distance_type: int = WANGXIN_DISTANCE_1, weights: Iterable = None, p: int = 1) -> np.float64:
+def wang_xin(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distance_type: int = WANGXIN_DISTANCE_1, weights: Iterable = None, p: int = 1) -> np.float64:
     """ Distances proposed by W. Wang and X. Xin, from the related article: 
         "Distance measure between intuitionistic fuzzy sets"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         distance_type: int, optional
         Type of computed distance: 
@@ -187,9 +187,9 @@ def yang_chiclana(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet,  distanc
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     distance_type: str, optional
         Type of computed distance: 
@@ -241,9 +241,9 @@ def grzegorzewski(A: FuzzySet, B: FuzzySet, distance_type: str = DISTANCE_HAMMIN
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
     distance_type: str, optional
         Type of computed distance: 
@@ -274,14 +274,14 @@ def grzegorzewski(A: FuzzySet, B: FuzzySet, distance_type: str = DISTANCE_HAMMIN
             "Invalid distance type provided. Please check the available flags.")
 
 
-def vlachos_sergiadis(A: FuzzySet, B: FuzzySet) -> np.float64:
+def vlachos_sergiadis(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet) -> np.float64:
     """ Distance proposed by I.K. Vlachos, G.D. Sergiadis from the related article: "Intuitionistic fuzzy information - Applications to pattern recognition"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         
     Returns
