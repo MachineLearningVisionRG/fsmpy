@@ -1,4 +1,4 @@
-__version__ = "0.1.1"
+__version__ = "0.1.0"
 
 """ Includes measure types variables, specifying the type of measure to use in specific measures.
 The types are used to specify a specific measure function proposed in a study.
