@@ -1,18 +1,18 @@
 import numpy as np
 
 from .utils._measure_input_validation import check_sets_cardinality
-from .sets import FuzzySet
+from .sets import IntuitionisticFuzzySet
 
 
-def fuzzy_divergence(A: FuzzySet, B: FuzzySet):
+def fuzzy_divergence(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet):
     """ Fuzzy Divergence proposed by J. Fan, W. Xie, from the related article: 
     "Distance measure and induced fuzzy entropy"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
-    B : FuzzySet
+    B : IntuitionisticFuzzySet
         A fuzzy set.
         
     Returns
@@ -31,13 +31,13 @@ def fuzzy_divergence(A: FuzzySet, B: FuzzySet):
     )
 
 
-def fuzzy_index(A: FuzzySet, coeff: int):
+def fuzzy_index(A: IntuitionisticFuzzySet, coeff: int):
     """ Fuzzy Index  T. Chaira, A.R. Ray, from the related article: 
     "Threshold selection using fuzzy set theory"
 
     Parameters
     ----------
-    A : FuzzySet
+    A : IntuitionisticFuzzySet
         A fuzzy set.
     coeff: int
         Coefficient of the index.

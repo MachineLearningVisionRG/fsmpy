@@ -5,10 +5,10 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.multiclass import unique_labels
 import numpy as np
 
-from ..sets import FuzzySet, IntuitionisticFuzzySet
+from ..sets import IntuitionisticFuzzySet
 
 
-def classify(class_patterns: Iterable[FuzzySet], sample_pattern: FuzzySet, 
+def classify(class_patterns: Iterable[IntuitionisticFuzzySet], sample_pattern: IntuitionisticFuzzySet, 
             measure_caller: Callable, *, is_distance=True, return_confidence=False, **kwargs) -> np.intp:
     """ Simple classification method to classify a sample pattern given class patterns, using the measure provided.
 
@@ -18,9 +18,9 @@ def classify(class_patterns: Iterable[FuzzySet], sample_pattern: FuzzySet,
 
     Parameters
     ----------
-    class_patterns : list[FuzzySet]
+    class_patterns : list[IntuitionisticFuzzySet]
         Class patterns to which the sample_pattern is classified.
-    sample_pattern : FuzzySet
+    sample_pattern : IntuitionisticFuzzySet
         The sample to be classified.
     measure_caller : Callable
         The measure function to use when measuring the sets of the ideally thresholded image and the current image set.
@@ -110,14 +110,14 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
         self.class_patterns = None
         self.is_distance = is_distance
 
-    def fit(self, X: Iterable[FuzzySet], y: Iterable) -> object:
+    def fit(self, X: Iterable[IntuitionisticFuzzySet], y: Iterable) -> object:
         """ "Trains" on the X data prpovided.
         
         Calculates the membership and non-membership values of each word for each unity class in y.
 
         Parameters
         ----------
-        X : Iterable[FuzzySet]
+        X : Iterable[IntuitionisticFuzzySet]
             Data to train upon.
         y : Iterabale
             Target vector relative to X.
@@ -131,9 +131,9 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
         --------
         fsmpy.utils.calculate_documents_membership
         """
-        if not all(isinstance(x, FuzzySet) for x in X):
+        if not all(isinstance(x, IntuitionisticFuzzySet) for x in X):
             raise TypeError(
-                "Expected X to be an Iterable of types FuzzySet or IntuitionisticFuzzySet, got {}".format(type(X)))
+                "Expected X to be an Iterable of types IntuitionisticFuzzySet or IntuitionisticFuzzySet, got {}".format(type(X)))
 
         y = np.array(y)
         X = np.array(X)
@@ -154,17 +154,17 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
                 self.class_patterns[_class] = IntuitionisticFuzzySet(
                     mean_m, mean_v, mean_h)
             else:
-                self.class_patterns[_class] = FuzzySet(mean_m, mean_v)
+                self.class_patterns[_class] = IntuitionisticFuzzySet(mean_m, mean_v)
         return self
 
-    def predict(self, X: Iterable[FuzzySet]) -> np.ndarray:
+    def predict(self, X: Iterable[IntuitionisticFuzzySet]) -> np.ndarray:
         """ Predict class labels for samples X.
         
         Calculates the membership and non-membership values of each word for each unity class in y.
 
         Parameters
         ----------
-        X : Iterable[FuzzySet]
+        X : Iterable[IntuitionisticFuzzySet]
             Samples.
             
         Returns
@@ -172,9 +172,9 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
         list[np.intp]
             Predicted class label per sample.
         """
-        if not all(isinstance(x, FuzzySet) for x in X):
+        if not all(isinstance(x, IntuitionisticFuzzySet) for x in X):
             raise TypeError(
-                "Expected X to be an Iterable of types FuzzySet or IntuitionisticFuzzySet, got {}".format(type(X)))
+                "Expected X to be an Iterable of types IntuitionisticFuzzySet or IntuitionisticFuzzySet, got {}".format(type(X)))
 
         predictions = []
         for x in X:
@@ -188,7 +188,7 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
             )
         return np.array([self.classes_[pred] for pred in predictions])
 
-    def predict_proba(self, X: Iterable[FuzzySet]) -> np.ndarray:
+    def predict_proba(self, X: Iterable[IntuitionisticFuzzySet]) -> np.ndarray:
         """ Measures of each sample.
         
         The returned values are the results returned when the measure_caller is called
@@ -196,7 +196,7 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
 
         Parameters
         ----------
-        X : Iterable[FuzzySet]
+        X : Iterable[IntuitionisticFuzzySet]
             Samples.
             
         Returns
@@ -204,9 +204,9 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
         list[list[float]]
             Returns the measures of the sample for each class, where classes are in self.classes_
         """
-        if not all(isinstance(x, FuzzySet) for x in X):
+        if not all(isinstance(x, IntuitionisticFuzzySet) for x in X):
             raise TypeError(
-                "Expected X to be an Iterable of types FuzzySet or IntuitionisticFuzzySet, got {}".format(type(X)))
+                "Expected X to be an Iterable of types IntuitionisticFuzzySet or IntuitionisticFuzzySet, got {}".format(type(X)))
 
         probas = []
         for x in X:

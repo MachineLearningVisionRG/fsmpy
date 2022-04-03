@@ -25,7 +25,7 @@ def calculate_documents_membership(data: Iterable, membership_weight: float, non
         
     Returns
     -------
-    list[FuzzySet]
+    list[IntuitionisticFuzzySet]
         List of IntuitionisticFuzzySets for each class.
     np.ndarray : means
         Mean values for each token in data.
@@ -150,8 +150,8 @@ def check_similarity_conditions(measure_caller: Callable, **measure_kwargs):
     value_range = np.arange(start=0.0, stop=1.01, step=0.01)
     for _ in tqdm(range(10000), desc="Test 1 progress:"):
         random_size = np.random.randint(1, 1000)
-        A = FuzzySet(np.random.choice(value_range, random_size), np.random.choice(value_range, random_size))
-        B = FuzzySet(np.random.choice(value_range, random_size), np.random.choice(value_range, random_size))
+        A = IntuitionisticFuzzySet(np.random.choice(value_range, random_size), np.random.choice(value_range, random_size))
+        B = IntuitionisticFuzzySet(np.random.choice(value_range, random_size), np.random.choice(value_range, random_size))
         assert measure_caller(A, B, **measure_kwargs) >= 0.0 and measure_caller(A, B, **measure_kwargs) <= 1.0
 
         assert measure_caller(A, B, **measure_kwargs) == measure_caller(B, A, **measure_kwargs)
