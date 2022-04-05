@@ -8,7 +8,8 @@ from .classifiers import classify, FuzzyTextClassifier
 from .image_processing import threshold
 
 
-def calculate_documents_membership(data: Iterable, membership_weight: float, non_membership_weight: float) -> Tuple[list, np.ndarray, np.ndarray]:
+def calculate_documents_membership(data: Iterable, membership_weight: float, non_membership_weight: float, 
+                                   means: Iterable[float] = None, stds: Iterable[float] = None) -> Tuple[list, np.ndarray, np.ndarray]:
     """ Calculates the Fuzzy Set of each class from token counts.
     Proposed by P. Intarapaiboon from the related article: 
     "Text classification using similarity measures on intuitionistic fuzzy sets".
@@ -35,9 +36,13 @@ def calculate_documents_membership(data: Iterable, membership_weight: float, non
     See also
     --------
     sklearn.feature_extraction.text.CountVectorizer
-    """    
-    means = np.mean(data, axis=0, dtype=np.float64)  # mean of each sample
-    stds = np.std(data, axis=0, dtype=np.float64, ddof=1)  # std of each sample
+    """
+    if means is None and stds is None:
+        means = np.mean(data, axis=0, dtype=np.float64)  # mean of each sample
+        stds = np.std(data, axis=0, dtype=np.float64, ddof=1)  # std of each sample
+    else:
+        if len(means) != len(data[0]) or len(stds) != len(data[0]):
+            raise ValueError(f"Parameters means and stds must have the same size as the number of samples in data ({len(means)} and {len(stds)} != {len(data[0])}).")
 
     # calculate membership values of each word for each document
     z = (data - means) / stds
@@ -48,8 +53,8 @@ def calculate_documents_membership(data: Iterable, membership_weight: float, non
     p = 1 - m - v
     
     sets = [
-        IntuitionisticFuzzySet(_m, v[i], p[i])
-        for i, _m in enumerate(m)
+        IntuitionisticFuzzySet(*args)
+        for args in zip(m, v, p)
     ]
 
     return sets, means, stds

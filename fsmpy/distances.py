@@ -154,8 +154,8 @@ def wang_xin(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distance_type
         The distance between the two sets provided.
     """
     check_sets_cardinality(A, B)
-    check_p(p, distance_type, WANGXIN_DISTANCE_2)
-    check_weights(weights, len(A), distance_type, WANGXIN_DISTANCE_1)
+    check_p(p, distance_type, measure_types_required=[WANGXIN_DISTANCE_2])
+    check_weights(weights, len(A), distance_type, measure_types_required=[WANGXIN_DISTANCE_1])
     n = len(A)
 
     m_diff = np.absolute(A.membership_values - B.membership_values)
@@ -235,7 +235,7 @@ def yang_chiclana(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet,  distanc
             "Invalid distance type provided. Please check the available flags.")
 
 
-def grzegorzewski(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distance_type: str = DISTANCE_HAMMING) -> np.float64:
+def grzegorzewski(A: FuzzySet, B: FuzzySet, distance_type: str = DISTANCE_HAMMING) -> np.float64:
     """ Distances proposed by P. Grzegorzewski from the related article: 
     "Distances between intuitionistic fuzzy sets and/or interval-valued fuzzy sets based on the Hausdorff metric"
 
@@ -302,7 +302,7 @@ def vlachos_sergiadis(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet) -> n
         arr[valid_indxs] = np.log(arr[valid_indxs])
         return arr
 
-    def iifs(setA: IntuitionisticFuzzySet, setB: IntuitionisticFuzzySet):
+    def iifs(setA: FuzzySet, setB: FuzzySet):
         return np.sum(
             setA.membership_values *
             _log(

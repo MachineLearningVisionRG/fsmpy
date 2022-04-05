@@ -43,7 +43,7 @@ def dengfeng_chuntian(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: i
     """
     check_sets_cardinality(A, B)
     check_p(p)
-    check_weights(weights, len(A))
+    check_weights(weights, len(A), sum_1=True)
 
     fA = (A.membership_values + 1 - A.non_membership_values) / 2.0
     fB = (B.membership_values + 1 - B.non_membership_values) / 2.0
@@ -85,7 +85,7 @@ def liang_shi(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet,  similarity_
     """
     check_sets_cardinality(A, B)
     check_p(p)
-    check_weights(weights, len(A), similarity_type, LIANG_SHI_SIMILARITY_3)
+    check_weights(weights, len(A), actual_measure_type=similarity_type, sum_1=True, measure_types_required=LIANG_SHI_SIMILARITY_3)
 
     if similarity_type == LIANG_SHI_SIMILARITY_3:
         if weights is None:
@@ -261,7 +261,7 @@ def julian_hung_lin(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int
     """
     check_sets_cardinality(A, B)
     check_p(p)
-    check_weights(weights, len(A))
+    check_weights(weights, len(A), sum_1=True)
 
     if weights is None:
         weights = np.ones(len(A)) / len(A)
@@ -358,7 +358,7 @@ def ye(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, weights: Iterable =
     if weights is None:
         return 1.0 / n * np.sum(nominator / denominator)
     else:
-        check_weights(weights, len(A))
+        check_weights(weights, len(A), sum_1=True)
         return sum(weights * nominator / denominator)
 
 
@@ -814,7 +814,7 @@ def liu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, p: int = 1, weight
     """
     check_sets_cardinality(A, B)
     check_p(p)
-    check_weights(weights, len(A))
+    check_weights(weights, len(A), sum_1=True)
     n = len(A)
 
     if weights is None:
@@ -1159,7 +1159,7 @@ def deng_jiang_fu(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, similari
         The similarity between the two sets provided.
     """
     check_sets_cardinality(A, B)
-    check_p(p, similarity_type, DENG_JIANG_FU_MONOTONIC_TYPE_1_3, DENG_JIANG_FU_MONOTONIC_TYPE_2_3, DENG_JIANG_FU_MONOTONIC_TYPE_3_1, DENG_JIANG_FU_MONOTONIC_TYPE_3_2, DENG_JIANG_FU_MONOTONIC_TYPE_3_3)
+    check_p(p, similarity_type, measure_types_required=[DENG_JIANG_FU_MONOTONIC_TYPE_1_3, DENG_JIANG_FU_MONOTONIC_TYPE_2_3, DENG_JIANG_FU_MONOTONIC_TYPE_3_1, DENG_JIANG_FU_MONOTONIC_TYPE_3_2, DENG_JIANG_FU_MONOTONIC_TYPE_3_3])
 
     if p is not None and similarity_type not in [DENG_JIANG_FU_MONOTONIC_TYPE_1_3, DENG_JIANG_FU_MONOTONIC_TYPE_2_3, DENG_JIANG_FU_MONOTONIC_TYPE_3_1, DENG_JIANG_FU_MONOTONIC_TYPE_3_2, DENG_JIANG_FU_MONOTONIC_TYPE_3_3]:
         warnings.warn("Ignoring parameter p (not used in provided similarity_type).")

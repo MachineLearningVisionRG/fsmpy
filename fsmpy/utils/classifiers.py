@@ -113,7 +113,7 @@ class FuzzyTextClassifier(BaseEstimator, ClassifierMixin):
     def fit(self, X: Iterable[IntuitionisticFuzzySet], y: Iterable) -> object:
         """ "Trains" on the X data prpovided.
         
-        Calculates the membership and non-membership values of each word for each unity class in y.
+        Calculates the membership and non-membership values of each word for each unique class in y.
 
         Parameters
         ----------
