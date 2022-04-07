@@ -154,8 +154,8 @@ def wang_xin(A: IntuitionisticFuzzySet, B: IntuitionisticFuzzySet, distance_type
         The distance between the two sets provided.
     """
     check_sets_cardinality(A, B)
-    check_p(p, distance_type, WANGXIN_DISTANCE_2)
-    check_weights(weights, len(A), distance_type, WANGXIN_DISTANCE_1)
+    check_p(p, distance_type, measure_types_required=[WANGXIN_DISTANCE_2])
+    check_weights(weights, len(A), distance_type, measure_types_required=[WANGXIN_DISTANCE_1])
     n = len(A)
 
     m_diff = np.absolute(A.membership_values - B.membership_values)
